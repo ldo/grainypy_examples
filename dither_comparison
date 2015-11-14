@@ -87,7 +87,7 @@ use_font = g.scaled_font
 text_height = g.font_extents.height
 top_extra = g.font_extents.height * 1.5
 text_colour = Colour.grey(0)
-draw_bounds = img_dimensions + margin + Vector(0, text_height)
+draw_dimensions = img_dimensions + margin + Vector(0, text_height)
 
 pix = qah.ImageSurface.create \
   (
@@ -95,7 +95,7 @@ pix = qah.ImageSurface.create \
     dimensions =
         round
           (
-                draw_bounds * Vector(nr_cols, nr_rows)
+                draw_dimensions * Vector(nr_cols, nr_rows)
             +
                 margin
             +
@@ -120,7 +120,7 @@ ctx.show_text(title)
 row = 0
 col = 0
 for label, to_depth, dither in dither_params :
-    origin = draw_bounds * Vector(col, row) + margin / 2 + Vector(0, top_extra)
+    origin = draw_dimensions * Vector(col, row) + margin / 2 + Vector(0, top_extra)
     if to_depth != None :
         (grainy.diffusion_dither_image, grainy.ordered_dither_image) \
             [isinstance(dither, BayerMatrix)] \
@@ -145,12 +145,21 @@ for label, to_depth, dither in dither_params :
         .rectangle(Rect(origin.x, origin.y, img_dimensions.x, img_dimensions.y))
         .fill()
     )
+    ctx.font_matrix = qah.Matrix.scale(font_size)
     text_extents = ctx.text_extents(label)
+    max_text_width = draw_dimensions.x * 0.9
+    if text_extents.width > max_text_width :
+        hor_size = font_size * max_text_width / text_extents.width
+        text_extents.width = max_text_width
+    else :
+        hor_size = font_size
+    #end if
+    ctx.font_matrix = qah.Matrix.scale((hor_size, font_size))
     ctx.move_to \
       (
             origin
         +
-            draw_bounds * Vector(0.5, 1)
+            draw_dimensions * Vector(0.5, 1)
         +
             Vector
               (
