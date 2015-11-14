@@ -1,0 +1,169 @@
+#!/usr/bin/python3
+#+
+# GrainyPy example--Comparison of different dithering settings
+#
+# Copyright 2015 by Lawrence D'Oliveiro <ldo@geek-central.gen.nz>. This
+# script is licensed CC0
+# <https://creativecommons.org/publicdomain/zero/1.0/>; do with it
+# what you will.
+#-
+
+import sys
+import os
+import math
+import qahirah as qah
+from qahirah import \
+    CAIRO, \
+    Colour, \
+    Matrix, \
+    Rect, \
+    Vector
+import grainy
+from grainy import \
+    BayerMatrix, \
+    diffusion
+
+max_dimensions = Vector(640, 480) # because screens in the old days weren’t much larger than this
+dither_params = \
+    ( # combinations of (do_depth, dither_order) to try
+        ("Original", None, None),
+        ("Truncate", 1, BayerMatrix(1)),
+        ("Ordered--Bayer(2)", 0, BayerMatrix(2)),
+        ("Ordered--Bayer(4)", 0, BayerMatrix(4)),
+        ("Ordered--Bayer(8)", 0, BayerMatrix(8)),
+        ("Ordered--Bayer(16)", 0, BayerMatrix(16)),
+        ("Diffusion--Floyd-Steinberg", 1, diffusion.floyd_steinberg),
+        ("Diffusion--Jarvis-Judice-Ninke", 1, diffusion.jarvis_judice_ninke),
+        ("Diffusion--Stucki", 1, diffusion.stucki),
+        ("Diffusion--Burkes", 1, diffusion.burkes),
+        ("Diffusion--Sierra3", 1, diffusion.sierra3),
+        ("Diffusion--Sierra2", 1, diffusion.sierra2),
+        ("Diffusion--Sierra Lite", 1, diffusion.sierra_lite),
+    )
+margin = Vector(10, 10)
+
+if len(sys.argv) != 2 :
+    raise RuntimeError("usage: %s filename" % sys.argv[0])
+#end if
+
+img = qah.ImageSurface.create_from_png(sys.argv[1])
+fit_img = \
+    Rect.fit_to \
+      (
+        dst = Rect.from_dimensions(max_dimensions),
+        src = Rect.from_dimensions(img.dimensions),
+        outside = False
+      )
+img_dimensions = round(fit_img.mapdelta(img.dimensions))
+sys.stderr.write("dest img dimensions = {!r}\n".format(img_dimensions)) # debug
+sys.stderr.write("fit_img maps {!r} to {!r}\n".format(Rect.from_dimensions(img.dimensions), Rect.from_dimensions(img.dimensions).transform(fit_img))) # debug
+src = qah.ImageSurface.create \
+  (
+    format = CAIRO.FORMAT_RGB24,
+    dimensions = img_dimensions
+  )
+(qah.Context.create(src)
+    .set_matrix(Matrix.scale(img_dimensions / img.dimensions))
+    .set_source
+      (
+        qah.Pattern.create_for_surface(img)
+            .set_filter(CAIRO.FILTER_BEST)
+      )
+    .paint()
+)
+src.flush()
+tmp = src.create_like()
+del img # free memory
+
+nr_cols = math.ceil(math.sqrt(len(dither_params)))
+nr_rows = math.ceil(len(dither_params) / nr_cols)
+
+font_size = 24
+g = qah.Context.create_for_dummy()
+g.select_font_face("sans-serif", CAIRO.FONT_SLANT_NORMAL, CAIRO.FONT_WEIGHT_BOLD)
+g.set_font_size(font_size)
+use_font = g.scaled_font
+text_height = g.font_extents.height
+top_extra = g.font_extents.height * 1.5
+text_colour = Colour.grey(0)
+draw_bounds = img_dimensions + margin + Vector(0, text_height)
+
+pix = qah.ImageSurface.create \
+  (
+    format = CAIRO.FORMAT_RGB24,
+    dimensions =
+        round
+          (
+                draw_bounds * Vector(nr_cols, nr_rows)
+            +
+                margin
+            +
+                Vector(0, top_extra)
+          )
+  )
+ctx = \
+    (qah.Context.create(pix)
+        .set_source_colour(qah.Colour.grey(1))
+        .paint()
+    )
+ctx.scaled_font = use_font
+title = "Comparison Of Dithering Algorithms"
+text_extents = ctx.text_extents(title)
+ctx.move_to \
+  ((
+    (pix.width - text_extents.width) / 2,
+    text_extents.height + text_extents.y_bearing + top_extra / 2
+  ))
+ctx.source_colour = text_colour
+ctx.show_text(title)
+row = 0
+col = 0
+for label, to_depth, dither in dither_params :
+    origin = draw_bounds * Vector(col, row) + margin / 2 + Vector(0, top_extra)
+    if to_depth != None :
+        (grainy.diffusion_dither_image, grainy.ordered_dither_image) \
+            [isinstance(dither, BayerMatrix)] \
+          (
+            dither = dither,
+            depth = to_depth,
+            src_img = src,
+            src_bounds = None,
+            dst_img = tmp,
+            dst_bounds = None,
+            do_a = False,
+            do_r = True,
+            do_g = True,
+            do_b = True
+          )
+        ctx.set_source_surface(tmp, origin)
+    else :
+        # show original-quality image
+        ctx.set_source_surface(src, origin)
+    #end if
+    (ctx
+        .rectangle(Rect(origin.x, origin.y, img_dimensions.x, img_dimensions.y))
+        .fill()
+    )
+    text_extents = ctx.text_extents(label)
+    ctx.move_to \
+      (
+            origin
+        +
+            draw_bounds * Vector(0.5, 1)
+        +
+            Vector
+              (
+                - text_extents.width / 2,
+                - text_height / 2
+              )
+      )
+    ctx.source_colour = text_colour
+    ctx.show_text(label)
+    col += 1
+    if col == nr_cols :
+        row += 1
+        col = 0
+    #end if
+#end for
+pix.flush()
+pix.write_to_png("{}.png".format(os.path.basename(sys.argv[0])))
