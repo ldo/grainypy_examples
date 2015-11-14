@@ -171,7 +171,7 @@ for row_nr, row in enumerate(dither_params) :
                 Vector
                   (
                     - text_extents.width / 2 - margin.x / 2,
-                    text_height / 2
+                    text_height
                   )
           )
         ctx.source_colour = text_colour
