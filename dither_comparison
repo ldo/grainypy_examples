@@ -58,8 +58,6 @@ fit_img = \
         outside = False
       )
 img_dimensions = round(fit_img.mapdelta(img.dimensions))
-sys.stderr.write("dest img dimensions = {!r}\n".format(img_dimensions)) # debug
-sys.stderr.write("fit_img maps {!r} to {!r}\n".format(Rect.from_dimensions(img.dimensions), Rect.from_dimensions(img.dimensions).transform(fit_img))) # debug
 src = qah.ImageSurface.create \
   (
     format = CAIRO.FORMAT_RGB24,
