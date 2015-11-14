@@ -166,12 +166,12 @@ for row_nr, row in enumerate(dither_params) :
           (
                 origin
             +
-                draw_dimensions * Vector(0.5, 1)
+                img_dimensions * Vector(0.5, 1)
             +
                 Vector
                   (
-                    - text_extents.width / 2,
-                    - text_height / 2
+                    - text_extents.width / 2 - margin.x / 2,
+                    text_height / 2
                   )
           )
         ctx.source_colour = text_colour
