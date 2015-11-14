@@ -13,7 +13,6 @@
 
 import sys
 import os
-import math
 import qahirah as qah
 from qahirah import \
     CAIRO, \
@@ -28,20 +27,29 @@ from grainy import \
 
 max_dimensions = Vector(640, 480) # because screens in the old days weren’t much larger than this
 dither_params = \
-    ( # combinations of (do_depth, dither_order) to try
-        ("Original", None, None),
-        ("Truncate", 1, BayerMatrix(1)),
-        ("Ordered--Bayer(2)", 0, BayerMatrix(2)),
-        ("Ordered--Bayer(4)", 0, BayerMatrix(4)),
-        ("Ordered--Bayer(8)", 0, BayerMatrix(8)),
-        ("Ordered--Bayer(16)", 0, BayerMatrix(16)),
-        ("Diffusion--Floyd-Steinberg", 1, diffusion.floyd_steinberg),
-        ("Diffusion--Jarvis-Judice-Ninke", 1, diffusion.jarvis_judice_ninke),
-        ("Diffusion--Stucki", 1, diffusion.stucki),
-        ("Diffusion--Burkes", 1, diffusion.burkes),
-        ("Diffusion--Sierra3", 1, diffusion.sierra3),
-        ("Diffusion--Sierra2", 1, diffusion.sierra2),
-        ("Diffusion--Sierra Lite", 1, diffusion.sierra_lite),
+    ( # combinations of (label, do_depth, dither_order) to try
+      # grouped into rows for display
+        (
+            ("Original", None, None),
+            ("Truncate", 1, BayerMatrix(1)),
+        ),
+        (
+            ("Ordered--Bayer(2)", 0, BayerMatrix(2)),
+            ("Ordered--Bayer(4)", 0, BayerMatrix(4)),
+            ("Ordered--Bayer(8)", 0, BayerMatrix(8)),
+            ("Ordered--Bayer(16)", 0, BayerMatrix(16)),
+        ),
+        (
+            ("Diffusion--Floyd-Steinberg", 1, diffusion.floyd_steinberg),
+            ("Diffusion--Jarvis-Judice-Ninke", 1, diffusion.jarvis_judice_ninke),
+            ("Diffusion--Stucki", 1, diffusion.stucki),
+            ("Diffusion--Burkes", 1, diffusion.burkes),
+        ),
+        (
+            ("Diffusion--Sierra3", 1, diffusion.sierra3),
+            ("Diffusion--Sierra2", 1, diffusion.sierra2),
+            ("Diffusion--Sierra Lite", 1, diffusion.sierra_lite),
+        ),
     )
 margin = Vector(10, 10)
 
@@ -76,8 +84,8 @@ src.flush()
 tmp = src.create_like()
 del img # free memory
 
-nr_cols = math.ceil(math.sqrt(len(dither_params)))
-nr_rows = math.ceil(len(dither_params) / nr_cols)
+nr_cols = max(len(row) for row in dither_params)
+nr_rows = len(dither_params)
 
 font_size = 24
 g = qah.Context.create_for_dummy()
@@ -117,63 +125,58 @@ ctx.move_to \
   ))
 ctx.source_colour = text_colour
 ctx.show_text(title)
-row = 0
-col = 0
-for label, to_depth, dither in dither_params :
-    origin = draw_dimensions * Vector(col, row) + margin / 2 + Vector(0, top_extra)
-    if to_depth != None :
-        (grainy.diffusion_dither_image, grainy.ordered_dither_image) \
-            [isinstance(dither, BayerMatrix)] \
-          (
-            dither = dither,
-            depth = to_depth,
-            src_img = src,
-            src_bounds = None,
-            dst_img = tmp,
-            dst_bounds = None,
-            do_a = False,
-            do_r = True,
-            do_g = True,
-            do_b = True
-          )
-        ctx.set_source_surface(tmp, origin)
-    else :
-        # show original-quality image
-        ctx.set_source_surface(src, origin)
-    #end if
-    (ctx
-        .rectangle(Rect(origin.x, origin.y, img_dimensions.x, img_dimensions.y))
-        .fill()
-    )
-    ctx.font_matrix = qah.Matrix.scale(font_size)
-    text_extents = ctx.text_extents(label)
-    max_text_width = draw_dimensions.x * 0.9
-    if text_extents.width > max_text_width :
-        hor_size = font_size * max_text_width / text_extents.width
-        text_extents.width = max_text_width
-    else :
-        hor_size = font_size
-    #end if
-    ctx.font_matrix = qah.Matrix.scale((hor_size, font_size))
-    ctx.move_to \
-      (
-            origin
-        +
-            draw_dimensions * Vector(0.5, 1)
-        +
-            Vector
+for row_nr, row in enumerate(dither_params) :
+    for col_nr, (label, to_depth, dither) in enumerate(row) :
+        origin = draw_dimensions * Vector(col_nr, row_nr) + margin / 2 + Vector(0, top_extra)
+        if to_depth != None :
+            (grainy.diffusion_dither_image, grainy.ordered_dither_image) \
+                [isinstance(dither, BayerMatrix)] \
               (
-                - text_extents.width / 2,
-                - text_height / 2
+                dither = dither,
+                depth = to_depth,
+                src_img = src,
+                src_bounds = None,
+                dst_img = tmp,
+                dst_bounds = None,
+                do_a = False,
+                do_r = True,
+                do_g = True,
+                do_b = True
               )
-      )
-    ctx.source_colour = text_colour
-    ctx.show_text(label)
-    col += 1
-    if col == nr_cols :
-        row += 1
-        col = 0
-    #end if
+            ctx.set_source_surface(tmp, origin)
+        else :
+            # show original-quality image
+            ctx.set_source_surface(src, origin)
+        #end if
+        (ctx
+            .rectangle(Rect(origin.x, origin.y, img_dimensions.x, img_dimensions.y))
+            .fill()
+        )
+        ctx.font_matrix = qah.Matrix.scale(font_size)
+        text_extents = ctx.text_extents(label)
+        max_text_width = draw_dimensions.x * 0.9
+        if text_extents.width > max_text_width :
+            hor_size = font_size * max_text_width / text_extents.width
+            text_extents.width = max_text_width
+        else :
+            hor_size = font_size
+        #end if
+        ctx.font_matrix = qah.Matrix.scale((hor_size, font_size))
+        ctx.move_to \
+          (
+                origin
+            +
+                draw_dimensions * Vector(0.5, 1)
+            +
+                Vector
+                  (
+                    - text_extents.width / 2,
+                    - text_height / 2
+                  )
+          )
+        ctx.source_colour = text_colour
+        ctx.show_text(label)
+    #end for
 #end for
 pix.flush()
 pix.write_to_png("{}.png".format(os.path.basename(sys.argv[0])))
