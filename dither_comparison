@@ -1,6 +1,9 @@
 #!/usr/bin/python3
 #+
-# GrainyPy example--Comparison of different dithering settings
+# GrainyPy example--Comparison of different dithering settings.
+# Invoke this script with the name of an input PNG file. The
+# script will create an output image called dither_comparison.png,
+# showing all the different dithering options applied to the input image.
 #
 # Copyright 2015 by Lawrence D'Oliveiro <ldo@geek-central.gen.nz>. This
 # script is licensed CC0
