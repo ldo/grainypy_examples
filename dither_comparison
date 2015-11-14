@@ -31,7 +31,7 @@ dither_params = \
       # grouped into rows for display
         (
             ("Original", None, None),
-            ("Truncate", 1, BayerMatrix(1)),
+            ("Simple Truncate", 1, BayerMatrix(1)),
         ),
         (
             ("Ordered--Bayer(2)", 0, BayerMatrix(2)),
