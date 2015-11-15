@@ -175,7 +175,7 @@ def make_noise_pat(strength) :
               )
           )
           .set_extend(CAIRO.EXTEND_REPEAT)
-          .set_filter(CAIRO.FILTER_NEAREST) # avoid interpolation
+          #.set_filter(CAIRO.FILTER_NEAREST) # try this if you like
           .set_matrix(Matrix.scale(0.5)) # make the noise coarser
         )
 #end make_noise_pat
