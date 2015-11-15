@@ -31,26 +31,26 @@ dither_params = \
       # grouped into rows for display
         (
             ("Original", None, None),
-            ("Posterize--4 bits", 4, BayerMatrix(1)),
-            ("Posterize--2 bits", 2, BayerMatrix(1)),
-            ("Posterize--1 bit", 1, BayerMatrix(1)),
+            ("Posterize—4 bits", 4, BayerMatrix(1)),
+            ("Posterize—2 bits", 2, BayerMatrix(1)),
+            ("Posterize—1 bit", 1, BayerMatrix(1)),
         ),
         (
-            ("Ordered--Bayer(2)", 0, BayerMatrix(2)),
-            ("Ordered--Bayer(4)", 0, BayerMatrix(4)),
-            ("Ordered--Bayer(8)", 0, BayerMatrix(8)),
-            ("Ordered--Bayer(16)", 0, BayerMatrix(16)),
+            ("Ordered—Bayer(2)", 0, BayerMatrix(2)),
+            ("Ordered—Bayer(4)", 0, BayerMatrix(4)),
+            ("Ordered—Bayer(8)", 0, BayerMatrix(8)),
+            ("Ordered—Bayer(16)", 0, BayerMatrix(16)),
         ),
         (
-            ("Diffusion--Floyd-Steinberg", 1, diffusion.floyd_steinberg),
-            ("Diffusion--Jarvis-Judice-Ninke", 1, diffusion.jarvis_judice_ninke),
-            ("Diffusion--Stucki", 1, diffusion.stucki),
-            ("Diffusion--Burkes", 1, diffusion.burkes),
+            ("Diffusion—Floyd-Steinberg", 1, diffusion.floyd_steinberg),
+            ("Diffusion—Jarvis-Judice-Ninke", 1, diffusion.jarvis_judice_ninke),
+            ("Diffusion—Stucki", 1, diffusion.stucki),
+            ("Diffusion—Burkes", 1, diffusion.burkes),
         ),
         (
-            ("Diffusion--Sierra3", 1, diffusion.sierra3),
-            ("Diffusion--Sierra2", 1, diffusion.sierra2),
-            ("Diffusion--Sierra Lite", 1, diffusion.sierra_lite),
+            ("Diffusion—Sierra3", 1, diffusion.sierra3),
+            ("Diffusion—Sierra2", 1, diffusion.sierra2),
+            ("Diffusion—Sierra Lite", 1, diffusion.sierra_lite),
         ),
     )
 margin = Vector(10, 10)
