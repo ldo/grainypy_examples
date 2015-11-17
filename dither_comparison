@@ -58,6 +58,7 @@ margin = Vector(10, 10)
 if len(sys.argv) != 2 :
     raise RuntimeError("usage: %s filename" % sys.argv[0])
 #end if
+invert = False # set to True to check for any bias in dithered output levels
 
 img = qah.ImageSurface.create_from_png(sys.argv[1])
 fit_img = \
@@ -83,6 +84,28 @@ src = qah.ImageSurface.create \
     .paint()
 )
 src.flush()
+if invert :
+    # operate on inverted source
+    grainy.image_channel_op_1 \
+      (
+        op_table =
+            tuple
+              (
+                pix ^ 255
+                for pix in range(256)
+              ),
+        src_img = src,
+        src_bounds = None,
+        mask_img = None,
+        mask_bounds = None,
+        dst_img = src,
+        dst_bounds = None,
+        do_a = False,
+        do_r = True,
+        do_g = True,
+        do_b = True
+      )
+#end if
 tmp = src.create_like()
 del img # free memory
 
@@ -154,6 +177,28 @@ for row_nr, row in enumerate(dither_params) :
             .rectangle(Rect(origin.x, origin.y, img_dimensions.x, img_dimensions.y))
             .fill()
         )
+        if invert :
+            # undo inversion on output
+            grainy.image_channel_op_1 \
+              (
+                op_table =
+                    tuple
+                      (
+                        pix ^ 255
+                        for pix in range(256)
+                      ),
+                src_img = pix,
+                src_bounds = round(Rect(origin.x, origin.y, img_dimensions.x, img_dimensions.y)),
+                mask_img = None,
+                mask_bounds = None,
+                dst_img = pix,
+                dst_bounds = round(Rect(origin.x, origin.y, img_dimensions.x, img_dimensions.y)),
+                do_a = False,
+                do_r = True,
+                do_g = True,
+                do_b = True
+              )
+        #end if
         ctx.font_matrix = qah.Matrix.scale(font_size)
         text_extents = ctx.text_extents(label)
         max_text_width = draw_dimensions.x * 0.9
