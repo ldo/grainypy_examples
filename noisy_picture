@@ -196,7 +196,7 @@ noise = src.create_like() # need noise mask the same size as src image
 noise.flush()
 dst = src.create_like()
 #print(grainy.arith_op_table(lambda a, b : a + b, depth = 8, wrap = False)) # debug
-grainy.image_channel_op \
+grainy.image_channel_op_2 \
   (
     op_table = grainy.arith_op_table(func = lambda a, b : min(max(a + b - 0.5, 0), 1), depth = 8, wrap = False),
     srcl_img = src,

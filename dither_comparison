@@ -131,7 +131,7 @@ for row_nr, row in enumerate(dither_params) :
     for col_nr, (label, to_depth, dither) in enumerate(row) :
         origin = draw_dimensions * Vector(col_nr, row_nr) + margin / 2 + Vector(0, top_extra)
         if to_depth != None :
-            (grainy.diffusion_dither_image, grainy.ordered_dither_image) \
+            (grainy.image_diffusion_dither, grainy.image_ordered_dither) \
                 [isinstance(dither, BayerMatrix)] \
               (
                 dither = dither,
