@@ -113,12 +113,12 @@ nr_cols = max(len(row) for row in dither_params)
 nr_rows = len(dither_params)
 
 font_size = 24
-g = qah.Context.create_for_dummy()
-g.select_font_face("sans-serif", CAIRO.FONT_SLANT_NORMAL, CAIRO.FONT_WEIGHT_BOLD)
-g.set_font_size(font_size)
-use_font = g.scaled_font
-text_height = g.font_extents.height
-top_extra = g.font_extents.height * 1.5
+ctx = qah.Context.create_for_dummy()
+ctx.select_font_face("sans-serif", CAIRO.FONT_SLANT_NORMAL, CAIRO.FONT_WEIGHT_BOLD)
+ctx.set_font_size(font_size)
+use_font = ctx.scaled_font
+text_height = ctx.font_extents.height
+top_extra = ctx.font_extents.height * 1.5
 text_colour = Colour.grey(0)
 draw_dimensions = img_dimensions + margin + Vector(0, text_height)
 
