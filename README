@@ -1,10 +1,10 @@
-This repo contains source code demonstrating the use of the
-[grainypy](https://github.com/ldo/grainypy) Python module. Currently
-there is only one example script, dither_comparison, which shows off
-various dithering algorithms.
+This repo contains source code demonstrating the use of the GrainyPy
+([GitLab](https://gitlab.com/ldo/grainypy), [GitHub](https://github.com/ldo/grainypy))
+Python module. Currently there is only one example script, dither_comparison, which shows
+off various dithering algorithms.
 
 Sample output from this script can be seen on my on my [DeviantArt
 account](http://default-cube.deviantart.com/gallery/56848197/GrainyPy-Examples).
 
 Lawrence D'Oliveiro <ldo@geek-central.gen.nz>
-2015 November 18
+2017 April 7
